@@ -1,3 +1,8 @@
+// tests.cpp: some doctest unit tests for StrongIndex.
+//
+// Copyright 2020 Charles Hussong
+// Apache 2.0
+
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 #include "strong-index.hpp"
