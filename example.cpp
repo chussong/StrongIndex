@@ -12,11 +12,12 @@
 #include <array>
 #include <random>
 
+// The simplest way to use a StrongIndex is with a "using" declaration
+// like this (or the corresponding macro).
+using UserId = StrongIndex::Basic<struct UserIdTag>;
+//STRONG_INDEX_BASIC(UserId);
 class UserDb {
   public:
-    using Id = StrongIndex::Basic<struct UserIdTag>;
-    //STRONG_INDEX_BASIC(Id);
-
     UserDb(std::size_t size, std::mt19937& rng):
             friend_counts_(size) {
         std::uniform_int_distribution<> dist(0, 100);
@@ -25,7 +26,7 @@ class UserDb {
         }
     }
 
-    int friend_count(Id id) const noexcept {
+    int friend_count(UserId id) const noexcept {
         return friend_counts_[static_cast<std::size_t>(id)];
     }
 
@@ -33,10 +34,13 @@ class UserDb {
     std::vector<int> friend_counts_;
 };
 
-using StudentId = StrongIndex::Basic<struct CustomerIdTag>;
-//STRONG_INDEX_BASIC(StudentId);
+// You could also declare the StrongIndex type inside the class that
+// will use it.
 class StudentDb {
   public:
+    using Id = StrongIndex::Basic<struct CustomerIdTag>;
+    //STRONG_INDEX_BASIC(Id);
+
     explicit StudentDb(std::size_t size, std::mt19937& rng):
             gpas_(size) {
         std::uniform_real_distribution<> dist(0.0, 4.0);
@@ -45,7 +49,7 @@ class StudentDb {
         }
     }
 
-    double gpa(StudentId id) const noexcept {
+    double gpa(Id id) const noexcept {
         return gpas_[static_cast<std::size_t>(id)];
     }
 
@@ -53,9 +57,14 @@ class StudentDb {
     std::vector<double> gpas_;
 };
 
+// Now we will see that two distinct types have been created which
+// can be converted to the underlying type but not to each other.
+
 static constexpr std::size_t dbSize = 100;
 
 int main(int argc, char** argv) {
+    // To start with, we'll request two numbers in [0, dbSize) from the user
+    // and store them in an array called rawIds.
     if (argc != 3) {
         std::cerr << "Exactly two arguments are required:\n"
                   << "* A userId\n"
@@ -89,13 +98,24 @@ int main(int argc, char** argv) {
         }
     }
 
+    // You can construct a StrongIndex from the underlying type by
+    // directly invoking the constructor, using assignment operator=,
+    // or with a static_cast.
+    UserId userId(rawIds[0]);               // Directly invoked constructor
+    // UserId doesNotCompile = rawIds[0];   // No implicit construction
+    auto thisIsOk = UserId(rawIds[0]);      // This is explicit so it's OK
+    thisIsOk = rawIds[0];                   // Assignment of existing index OK
+    thisIsOk = userId;                      // Also works from same-type index
+    auto studentId = static_cast<StudentDb::Id>(rawIds[1]);
+    // StudentDb::Id notAllowed(userId);    // Can't construct from other types
+    // notAllowed = userId;                 // Can't assign from other types
+
+    // We'll just make up some random data to access using the indices.
     std::mt19937 rng(std::random_device{}());
     UserDb userDb(dbSize, rng);
     StudentDb studentDb(dbSize, rng);
 
-    auto userId = static_cast<UserDb::Id>(rawIds[0]);
-    auto studentId = static_cast<StudentId>(rawIds[1]);
-
+    // You can stream a StrongIndex out just like its underlying type.
     std::cout << "User with ID " << userId << " has "
               << userDb.friend_count(userId) << " friend";
     if (userDb.friend_count(userId) != 1) std::cout << 's';
@@ -104,19 +124,23 @@ int main(int argc, char** argv) {
     std::cout << "Student with ID " << studentId << " has a "
               << studentDb.gpa(studentId) << " GPA.\n";
 
-    /* These don't compile because the types don't match:
-    std::cout << "Can't look up a user with a raw ID: "
+    // You can't look something up in the wrong container because the types 
+    // don't match.
+    /*
+    std::cout << "Can't look up a user with a regular number: "
               << userDb.friend_count(rawIds[0]) << '\n';
     std::cout << "Can't look up a user with a student ID: "
               << userDb.friend_count(studentId) << '\n';
     // */
 
-    // We can check if two same-type indices are equal:
+    // You can check if two same-type indices are equal or unequal.
     if (userId != userId) {
         std::cerr << "This shouldn't be happening!\n";
         return EXIT_FAILURE;
     }
-    /* But comparing two dissimilar indices doesn't compile:
+    // But comparing two dissimilar indices doesn't compile, nor does
+    // comparing to the underlying type without a cast.
+    /*
     if (userId == studentId) {
         std::cout << "You really like that number, eh!\n";
     }
