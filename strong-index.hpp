@@ -1,5 +1,4 @@
-// strong-index.hpp: a template for strongly-typed indices
-// into containers.
+// strong-index.hpp: templates for strongly-typed indices into containers.
 //
 // Copyright 2020 Charles Hussong
 // Apache 2.0
@@ -17,6 +16,19 @@ namespace StrongIndex {
 // struct like StrongIndex<struct UserIdTag>. The second parameter, T, is the 
 // underlying type of the index which will actually be used inside the 
 // container.
+
+// Instead of writing the tags by hand, you can use these macros.
+// If you use them in a header file, please #undef them after using.
+
+/* 
+#define STRONG_INDEX_BASIC(name) \
+    using name = StrongIndex::Basic<struct name ## Tag>
+#define STRONG_INDEX_INCREMENTABLE(name) \
+    using name = StrongIndex::Incrementable<struct name ## Tag>
+#define STRONG_INDEX_FULL_ARITHMETIC(name) \
+    using name = StrongIndex::FullArithmetic<struct name ## Tag>
+// */
+
 
 // A Basic StrongIndex does not allow any direct modification of the value --
 // it has a constructor and assignment from the underlying type, a static cast 
@@ -61,8 +73,8 @@ class Basic {
 };
 
 // Incrementable allows ++ and -- operators (pre- and post- are both OK), as
-// well as adding and subtracting by the underlying type. Adding or subtracting
-// from other indices is not allowed.
+// well as adding and subtracting the underlying type. Adding or subtracting
+// other instances of the index type is not allowed.
 template<class Tag, typename T = std::size_t>
 class Incrementable {
     // Start with the same capabilities as Basic.
@@ -322,17 +334,6 @@ class FullArithmetic {
         return a;
     }
 };
-
-/* 
-// Instead of writing the tags by hand, you can use these macros.
-// If you use them in a header file, please #undef them after using.
-#define STRONG_INDEX_BASIC(name) \
-    using name = StrongIndex::Basic<struct name ## Tag>
-#define STRONG_INDEX_INCREMENTABLE(name) \
-    using name = StrongIndex::Incrementable<struct name ## Tag>
-#define STRONG_INDEX_FULL_ARITHMETIC(name) \
-    using name = StrongIndex::FullArithmetic<struct name ## Tag>
-// */
 
 } // namespace StrongIndex
 
