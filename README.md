@@ -8,8 +8,9 @@ If an argument to a random function is just `int user_id`, how is a reader suppo
 Using a strong type for these IDs makes it obvious that there are multiple distinct kinds. 
 Now you can pass `UserId user_id` and a reader (perhaps your future self) will immediately know that a `UserId` is a specific type of identifier.
 
-The entire library is a few templates contained in `strong-index.hpp`.
-The header provides three types of strong index: `StrongIndex::Basic`, `StrongIndex::Incrementable`, and `StrongIndex::FullArithmetic`.
+The entire library is a few templates contained in [`strong-index.hpp`](https://raw.githubusercontent.com/chussong/StrongIndex/master/strong-index.hpp), so you can just download that file, `#include` it, and you're ready to go.
+
+`strong-index.hpp` provides three types of strong index: `StrongIndex::Basic`, `StrongIndex::Incrementable`, and `StrongIndex::FullArithmetic`.
 In most cases you should probably use the Basic one, which can not be modified without casting to and from the underlying type.
 Incrementable can be incremented and decremented, as well as adding or subtracting the underlying type.
 FullArithmetic can additionally add or subtract other instances of itself, as well as multiply, divide, and mod by the underlying type.
