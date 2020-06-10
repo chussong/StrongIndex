@@ -98,12 +98,14 @@ void test_full_arithmetic(Index index, Underlying expectedValue) {
 }
 
 TEST_CASE("Basic operations work") {
+    REQUIRE(sizeof(Basic) == sizeof(Underlying));
     static constexpr Underlying value = 12;
     Basic index(value);
     test_basic(index, value);
 }
 
 TEST_CASE("Increment operations work") {
+    REQUIRE(sizeof(Incrementable) == sizeof(Underlying));
     static constexpr Underlying value = 61;
     Incrementable index(value);
     test_basic(index, value);
@@ -111,6 +113,7 @@ TEST_CASE("Increment operations work") {
 }
 
 TEST_CASE("Full arithmetic operations work") {
+    REQUIRE(sizeof(FullArithmetic) == sizeof(Underlying));
     static constexpr Underlying value = 107792;
     FullArithmetic index(value);
     test_basic(index, value);
